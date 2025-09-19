@@ -205,20 +205,58 @@ class SkyAnimationEngine:
         self.position_smoothing = 0.3  # Interpolation factor for smooth movement
         
         # Import our existing astronomical systems
+        print("DEBUG: Starting astronomical data initialization...")
         try:
-            from src.core.twilight_calculator import AdvancedSkyPalette
-            from src.core.moon_phases import MoonPhaseCalculator
-            from src.core.time_utils import load_astronomical_data, get_day_data
+            print("DEBUG: Attempting imports...")
+            
+            # Try relative imports first, then absolute
+            try:
+                from src.core.twilight_calculator import AdvancedSkyPalette
+                from src.core.moon_phases import MoonPhaseCalculator
+                from src.core.time_utils import load_astronomical_data, get_day_data
+            except ImportError:
+                # If relative imports fail, try adding the project root to path
+                import sys
+                import os
+                project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                if project_root not in sys.path:
+                    sys.path.insert(0, project_root)
+                
+                from src.core.twilight_calculator import AdvancedSkyPalette
+                from src.core.moon_phases import MoonPhaseCalculator
+                from src.core.time_utils import load_astronomical_data, get_day_data
+            
+            print("DEBUG: All imports successful")
             
             self.sky_palette = AdvancedSkyPalette()
             self.moon_calculator = MoonPhaseCalculator()
+            print("DEBUG: Astronomical objects created")
             
-            # Load astronomical data
-            self.sun_df, self.moon_df = load_astronomical_data()
+            # Load astronomical data with absolute paths
+            import os
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))  # Go up to project root
+            sun_file = os.path.join(project_root, "data", "hongkong_sunrise_sunset_2024_clean.csv")
+            moon_file = os.path.join(project_root, "data", "moonrise_moonset_2024_clean.csv")
+            
+            print(f"Loading sun data from: {sun_file}")
+            print(f"Loading moon data from: {moon_file}")
+            print(f"Sun file exists: {os.path.exists(sun_file)}")
+            print(f"Moon file exists: {os.path.exists(moon_file)}")
+            
+            self.sun_df, self.moon_df = load_astronomical_data(sun_file, moon_file)
             self.has_data = self.sun_df is not None and self.moon_df is not None
+            
+            print(f"Data loading result: has_data = {self.has_data}")
+            if self.has_data:
+                print(f"Loaded {len(self.sun_df)} days of sun data, {len(self.moon_df)} days of moon data")
             
         except ImportError as e:
             print(f"Warning: Could not import astronomical modules: {e}")
+            self.has_data = False
+        except Exception as e:
+            print(f"Error loading astronomical data: {e}")
+            import traceback
+            traceback.print_exc()
             self.has_data = False
         
         # Initialize performance optimizations
@@ -564,16 +602,29 @@ class SkyAnimationEngine:
     
     def _calculate_raw_sun_position(self) -> Tuple[int, int]:
         """Calculate raw sun position without smoothing."""
-        # Improved sun arc calculation with better interpolation
         hour = self.animation_time
         
-        # Normalize time to day progress (6 AM to 6 PM)
-        if hour < 6:
-            day_progress = 0  # Before sunrise
-        elif hour > 18:
-            day_progress = 1  # After sunset
+        # Get actual sunrise/sunset data for current day
+        if self.has_data:
+            day_data = self._get_cached_day_data(self.day_of_year)
+            if day_data and day_data.get('sunrise') is not None and day_data.get('sunset') is not None:
+                sunrise = day_data['sunrise']
+                sunset = day_data['sunset']
+                
+                # Use actual astronomical data for sun position
+                if hour < sunrise:
+                    day_progress = 0  # Before sunrise
+                elif hour > sunset:
+                    day_progress = 1  # After sunset
+                else:
+                    daylight_duration = sunset - sunrise
+                    day_progress = (hour - sunrise) / daylight_duration if daylight_duration > 0 else 0
+            else:
+                # Fallback to default times if no data
+                day_progress = self._get_fallback_day_progress(hour)
         else:
-            day_progress = (hour - 6) / 12  # 0 to 1 during day
+            # No data available, use fallback
+            day_progress = self._get_fallback_day_progress(hour)
         
         # Sun path parameters
         arc_width = self.width * 0.8
@@ -590,6 +641,16 @@ class SkyAnimationEngine:
         sun_y = base_y - arc_height * height_factor
         
         return int(sun_x), int(sun_y)
+    
+    def _get_fallback_day_progress(self, hour: float) -> float:
+        """Fallback day progress calculation when no astronomical data available."""
+        # Use default sunrise/sunset times (6 AM to 6 PM)
+        if hour < 6:
+            return 0  # Before sunrise
+        elif hour > 18:
+            return 1  # After sunset
+        else:
+            return (hour - 6) / 12  # 0 to 1 during day
     
     def get_moon_position(self) -> Tuple[int, int]:
         """Calculate moon position with smooth interpolation based on real data."""
@@ -612,16 +673,37 @@ class SkyAnimationEngine:
     def _calculate_raw_moon_position(self) -> Tuple[int, int]:
         """Calculate raw moon position using cached astronomical data."""
         if not self.has_data:
+            print(f"DEBUG: Using fallback moon position (no data) at {self.animation_time:.2f}h")
             return self._get_fallback_moon_position()
         
         try:
             # Use cached astronomical data
             day_data = self._get_cached_day_data(self.day_of_year)
+            current_hour = self.animation_time
+            
+            # First check if we should use previous day's cross-day moon
+            prev_day_data = self._get_cached_day_data(self.day_of_year - 1) if self.day_of_year > 1 else None
+            if (prev_day_data and 
+                prev_day_data.get('moonrise') is not None and 
+                prev_day_data.get('moonset') is not None and
+                prev_day_data['moonrise'] > prev_day_data['moonset']):
+                # Previous day had cross-day moon that should continue to today
+                prev_moonrise = prev_day_data['moonrise']
+                prev_moonset = prev_day_data['moonset']  # This is the moonset time for today
+                
+                # Moon should be visible from 00:00 until the moonset time
+                if current_hour <= prev_moonset:
+                    # Calculate progress: moon has been visible since prev_moonrise yesterday
+                    total_duration = (24.0 - prev_moonrise) + prev_moonset
+                    time_since_rise = (24.0 - prev_moonrise) + current_hour
+                    progress = time_since_rise / total_duration if total_duration > 0 else 0
+                    
+                    return self._calculate_moon_arc_position(progress)
             
             if day_data and day_data.get('moonrise') is not None and day_data.get('moonset') is not None:
+                # Case: both moonrise and moonset exist for current day
                 moonrise = day_data['moonrise']
                 moonset = day_data['moonset']
-                current_hour = self.animation_time
                 
                 # Check if moon is currently visible with improved logic
                 is_visible, progress = self._calculate_moon_visibility(current_hour, moonrise, moonset)
@@ -630,9 +712,36 @@ class SkyAnimationEngine:
                     return self._calculate_moon_arc_position(progress)
                 else:
                     return (-100, -100)  # Off-screen position
+                    
+            elif day_data and day_data.get('moonrise') is None and day_data.get('moonset') is not None:
+                # Cross-day case: no moonrise today but moonset exists (moon rose yesterday)
+                moonset = day_data['moonset']
+                current_hour = self.animation_time
+                
+                # Moon is visible from start of day until moonset
+                if current_hour <= moonset:
+                    # Need to get previous day's moonrise to calculate total duration
+                    prev_day_data = self._get_cached_day_data(self.day_of_year - 1)
+                    if prev_day_data and prev_day_data.get('moonrise') is not None:
+                        prev_moonrise = prev_day_data['moonrise']
+                        # Total duration spans from previous day's moonrise to today's moonset
+                        total_duration = (24.0 - prev_moonrise) + moonset
+                        # Time elapsed since moonrise (including previous day)
+                        time_since_rise = (24.0 - prev_moonrise) + current_hour
+                        progress = time_since_rise / total_duration if total_duration > 0 else 0
+                    else:
+                        # Fallback: approximate progress based on current day only
+                        progress = current_hour / moonset if moonset > 0 else 0
+                    
+                    return self._calculate_moon_arc_position(progress)
+                else:
+                    return (-100, -100)  # Off-screen position
+            else:
+                print(f"DEBUG: Invalid day data for day {self.day_of_year}, using fallback")
             
         except Exception as e:
             print(f"Moon position calculation error: {e}")
+            print(f"DEBUG: Exception in moon calculation, using fallback")
         
         return self._get_fallback_moon_position()
     
@@ -647,21 +756,17 @@ class SkyAnimationEngine:
             else:
                 return False, None
         else:
-            # Moon sets after midnight (moonrise > moonset)
-            if current_hour >= moonrise or current_hour <= moonset:
-                if current_hour >= moonrise:
-                    # After moonrise, before midnight
-                    time_since_rise = current_hour - moonrise
-                    total_visible = (24 - moonrise) + moonset
-                    progress = time_since_rise / total_visible if total_visible > 0 else 0
-                else:
-                    # After midnight, before moonset
-                    time_since_rise = (24 - moonrise) + current_hour
-                    total_visible = (24 - moonrise) + moonset
-                    progress = time_since_rise / total_visible if total_visible > 0 else 0
-                
+            # Cross-day case: moonrise > moonset means moonset is NEXT day
+            # Total moon duration spans from moonrise on current day to moonset on next day
+            total_duration = (24.0 - moonrise) + moonset  # e.g., (24-23.283) + 11.233 = 12.05 hours
+            
+            if current_hour >= moonrise:
+                # Current day: after moonrise until end of day
+                time_since_rise = current_hour - moonrise
+                progress = time_since_rise / total_duration if total_duration > 0 else 0
                 return True, progress
             else:
+                # Current day: before moonrise - not visible
                 return False, None
     
     def _calculate_moon_arc_position(self, progress: float) -> Tuple[int, int]:
@@ -681,27 +786,66 @@ class SkyAnimationEngine:
     
     def _get_fallback_moon_position(self) -> Tuple[int, int]:
         """Fallback moon position calculation when no data available."""
-        # Simple nighttime visibility check
-        if 6 <= self.animation_time <= 18:
-            # Daytime - moon usually not visible or very faint
+        print(f"DEBUG: Using fallback moon logic at {self.animation_time:.2f}h on day {self.day_of_year}")
+        
+        # Try to use approximate moonrise/moonset times even in fallback mode
+        # Most moons rise in evening/night and set in morning
+        approximate_moonrise = 20.0  # 8 PM average
+        approximate_moonset = 8.0    # 8 AM average
+        
+        # Check if moon should be visible using approximate times
+        current_hour = self.animation_time
+        
+        # Moon is visible from moonrise to moonset (crossing midnight)
+        if current_hour >= approximate_moonrise or current_hour <= approximate_moonset:
+            # Calculate progress through visibility period
+            if current_hour >= approximate_moonrise:
+                # After moonrise, before midnight
+                time_since_rise = current_hour - approximate_moonrise
+                total_visible = (24 - approximate_moonrise) + approximate_moonset
+                progress = time_since_rise / total_visible if total_visible > 0 else 0
+            else:
+                # After midnight, before moonset
+                time_since_rise = (24 - approximate_moonrise) + current_hour
+                total_visible = (24 - approximate_moonrise) + approximate_moonset
+                progress = time_since_rise / total_visible if total_visible > 0 else 0
+            
+            # Use the same arc calculation as normal moon
+            return self._calculate_moon_arc_position(progress)
+        else:
+            # Daytime - moon not visible
             return (-100, -100)  # Off-screen
         
-        # Nighttime - show moon with simplified arc
-        hour_angle = (self.animation_time + 6) / 12 * math.pi  # Rough night arc
+        # Use same movement pattern as moon arc (LEFT to RIGHT)
         arc_width = self.width * 0.7
         arc_height = self.height * 0.5
         center_x = self.width // 2
         base_y = self.height * 0.9
         
-        moon_x = center_x + (arc_width // 2) * math.cos(hour_angle)
-        moon_y = base_y - arc_height * abs(math.sin(hour_angle))
+        # Calculate position using same formula as real moon data
+        moon_x = center_x - (arc_width // 2) + (arc_width * night_progress)
+        
+        # Calculate height using sine for natural arc
+        angle = night_progress * math.pi  # 0 to π radians
+        moon_y = base_y - arc_height * math.sin(angle)
         
         return int(moon_x), int(moon_y)
     
     def render_celestial_bodies(self, surface: pygame.Surface):
         """Render sun and moon with optimized cached glow effects and smooth transitions."""
-        # Check if it's day or night to determine visibility
-        is_day = 6 <= self.animation_time <= 18
+        # Get actual sunrise/sunset times from data instead of hardcoded values
+        if self.has_data:
+            day_data = self._get_cached_day_data(self.day_of_year)
+            if day_data and day_data.get('sunrise') is not None and day_data.get('sunset') is not None:
+                sunrise = day_data['sunrise']
+                sunset = day_data['sunset']
+                is_day = sunrise <= self.animation_time <= sunset
+            else:
+                # Fallback to default times if no data
+                is_day = 6 <= self.animation_time <= 18
+        else:
+            # No data available, use fallback
+            is_day = 6 <= self.animation_time <= 18
         
         # Render sun during day with cached glow and fade transitions
         if is_day:
