@@ -145,7 +145,7 @@ class AdvancedSkyPalette:
             'blue_hour_morning': (60, 90, 150),
             'blue_hour_evening': (80, 60, 140),
             'golden_hour': (255, 200, 100),
-            'day': (135, 206, 235),  # Sky blue
+            'day': (240, 248, 255),  # Much brighter sky - almost white with hint of blue
             'sunrise': (255, 180, 120),
             'sunset': (255, 120, 80)
         }

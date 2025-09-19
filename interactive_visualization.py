@@ -29,30 +29,45 @@ class InteractiveTimePixel:
         self.screen_width = info.current_w
         self.screen_height = info.current_h
         
-        # Configuration for large, interactive display
+        # Configuration for scrollable display
         self.IMG_WIDTH = 24  # hours in a day
         self.data_height = 366  # days in year
         
-        # Calculate optimal pixel size for user interaction
-        # Aim for at least 20x20 pixels per data point
-        self.min_pixel_size = 20
-        max_width_pixels = (self.screen_width - 400) // self.IMG_WIDTH  # Leave space for UI
-        max_height_pixels = (self.screen_height - 200) // self.data_height
+        # Calculate optimal pixel size that fits screen
+        self.min_pixel_size = 8
+        self.max_pixel_size = 25
         
-        self.pixel_size = max(self.min_pixel_size, min(max_width_pixels, max_height_pixels, 30))
+        # UI Layout - fixed sizes that fit on screen
+        self.ui_width = 350
+        self.available_width = min(self.screen_width - self.ui_width - 50, 1200)
+        self.available_height = min(self.screen_height - 100, 900)
+        
+        # Calculate pixel size that fits the available space
+        max_width_pixels = self.available_width // self.IMG_WIDTH
+        max_height_pixels = self.available_height // min(50, self.data_height)  # Show at least 50 days
+        
+        self.pixel_size = max(self.min_pixel_size, min(max_width_pixels, max_height_pixels, self.max_pixel_size))
         
         # Calculate actual visualization dimensions
         self.vis_width = self.IMG_WIDTH * self.pixel_size
         self.vis_height = self.data_height * self.pixel_size
         
-        # UI Layout
-        self.ui_width = 380
-        self.total_width = self.vis_width + self.ui_width
-        self.total_height = max(self.vis_height, 800)
+        # Window dimensions - fit on screen
+        self.window_width = min(self.vis_width + self.ui_width, self.screen_width - 100)
+        self.window_height = min(max(self.available_height, 600), self.screen_height - 100)
         
-        # Create screen
-        self.screen = pygame.display.set_mode((self.total_width, self.total_height))
-        pygame.display.set_caption("Interactive Time's Pixel - Click to Explore!")
+        # Scrollable viewport
+        self.viewport_width = self.window_width - self.ui_width
+        self.viewport_height = self.window_height
+        
+        # Create screen - fits on user's display
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height))
+        pygame.display.set_caption("Interactive Time's Pixel - Scroll to Explore!")
+        
+        # Scrolling state
+        self.scroll_y = 0
+        self.max_scroll_y = max(0, self.vis_height - self.viewport_height)
+        self.scroll_speed = 20
         
         # Colors for UI
         self.ui_colors = {
@@ -60,7 +75,9 @@ class InteractiveTimePixel:
             'panel': (40, 40, 50),
             'text': (220, 220, 220),
             'highlight': (100, 150, 255),
-            'border': (80, 80, 90)
+            'border': (80, 80, 90),
+            'scrollbar': (120, 120, 130),
+            'scrollbar_thumb': (180, 180, 190)
         }
         
         # Fonts
@@ -104,10 +121,16 @@ class InteractiveTimePixel:
         self.pixel_surface = pygame.Surface((self.vis_width, self.vis_height))
         self.update_pixel_surface()
         
+        # Create viewport surface for scrolling
+        self.viewport_surface = pygame.Surface((self.viewport_width, self.viewport_height))
+        
         print(f"Interactive visualization ready!")
+        print(f"Window size: {self.window_width}x{self.window_height}")
         print(f"Pixel size: {self.pixel_size}x{self.pixel_size}")
         print(f"Visualization: {self.vis_width}x{self.vis_height}")
-        print(f"Total window: {self.total_width}x{self.total_height}")
+        print(f"Viewport: {self.viewport_width}x{self.viewport_height}")
+        print(f"Scrollable: {'Yes' if self.max_scroll_y > 0 else 'No'}")
+        print(f"Max scroll: {self.max_scroll_y}px")
     
     def generate_all_pixels(self):
         """Pre-generate all pixels for the entire year."""
@@ -218,14 +241,21 @@ class InteractiveTimePixel:
         return (r, g, b)
     
     def get_pixel_from_mouse(self, mouse_pos):
-        """Convert mouse position to day/hour coordinates."""
+        """Convert mouse position to day/hour coordinates considering scroll."""
         mx, my = mouse_pos
         
         # Check if mouse is over visualization area
-        if mx < 0 or mx >= self.vis_width or my < 0 or my >= self.vis_height:
+        if mx < 0 or mx >= self.viewport_width:
             return None, None
         
-        day = my // self.pixel_size
+        # Adjust mouse position for scrolling
+        actual_y = my + self.scroll_y
+        
+        # Check bounds
+        if actual_y < 0 or actual_y >= self.vis_height:
+            return None, None
+        
+        day = actual_y // self.pixel_size
         hour = mx // self.pixel_size
         
         if 0 <= day < len(self.all_pixels) and 0 <= hour < self.IMG_WIDTH:
@@ -235,8 +265,9 @@ class InteractiveTimePixel:
     
     def draw_ui_panel(self):
         """Draw the information panel on the right side."""
-        panel_x = self.vis_width + 10
-        panel_rect = pygame.Rect(panel_x, 10, self.ui_width - 20, self.total_height - 20)
+        panel_x = self.viewport_width + 10
+        panel_width = self.ui_width - 20
+        panel_rect = pygame.Rect(panel_x, 10, panel_width, self.window_height - 20)
         
         # Background panel
         pygame.draw.rect(self.screen, self.ui_colors['panel'], panel_rect)
@@ -246,45 +277,100 @@ class InteractiveTimePixel:
         
         # Title
         title = self.font_large.render("Time's Pixel Explorer", True, self.ui_colors['text'])
-        self.screen.blit(title, (panel_x + 20, y_offset))
-        y_offset += 50
+        self.screen.blit(title, (panel_x + 15, y_offset))
+        y_offset += 40
+        
+        # Current scroll position info
+        if self.max_scroll_y > 0:
+            current_day = int(self.scroll_y // self.pixel_size)
+            visible_days = int(self.viewport_height // self.pixel_size)
+            end_day = min(current_day + visible_days, 366)
+            
+            # Get current month info
+            if current_day < len(self.all_pixels):
+                day_data = get_day_data(self.sun_df, self.moon_df, current_day)
+                if day_data and day_data['date']:
+                    from datetime import datetime
+                    try:
+                        date_obj = datetime.strptime(day_data['date'], '%Y-%m-%d')
+                        month_name = date_obj.strftime('%B')
+                        scroll_info = f"📅 {month_name} - Days {current_day + 1}-{end_day}/366"
+                    except:
+                        scroll_info = f"📅 Days {current_day + 1}-{end_day}/366"
+                else:
+                    scroll_info = f"📅 Days {current_day + 1}-{end_day}/366"
+            else:
+                scroll_info = f"📅 Days {current_day + 1}-{end_day}/366"
+            
+            scroll_surface = self.font_small.render(scroll_info, True, self.ui_colors['highlight'])
+            self.screen.blit(scroll_surface, (panel_x + 15, y_offset))
+            y_offset += 25
         
         # Current palette info
         palette_text = f"Palette: {self.palette_options[self.current_palette_idx].title()}"
         palette_surface = self.font_medium.render(palette_text, True, self.ui_colors['text'])
-        self.screen.blit(palette_surface, (panel_x + 20, y_offset))
+        self.screen.blit(palette_surface, (panel_x + 15, y_offset))
         y_offset += 30
         
         # Instructions
         instructions = [
             "🖱️ CONTROLS:",
             "• Click pixel for details",
+            "• Mouse wheel - Scroll",
+            "• ↑↓ Arrow keys - Scroll",
+            "• Home/End - Top/Bottom",
             "• P - Change palette",
             "• T - Toggle twilight info",
             "• ESC - Exit",
             "",
-            "📊 VISUALIZATION:",
-            f"• Days: {len(self.all_pixels)}",
+            "📊 CURRENT VIEW:",
+            f"• Window: {self.window_width}x{self.window_height}",
             f"• Pixel size: {self.pixel_size}px",
-            f"• Hours per day: {self.IMG_WIDTH}",
+            f"• Days visible: ~{int(self.viewport_height // self.pixel_size)}",
+            f"• Total days: {len(self.all_pixels)}",
+            f"• Scroll: {int((self.scroll_y/self.max_scroll_y)*100) if self.max_scroll_y > 0 else 0}%",
         ]
         
         for instruction in instructions:
             color = self.ui_colors['highlight'] if instruction.startswith(('🖱️', '📊')) else self.ui_colors['text']
             inst_surface = self.font_small.render(instruction, True, color)
-            self.screen.blit(inst_surface, (panel_x + 20, y_offset))
-            y_offset += 20
+            self.screen.blit(inst_surface, (panel_x + 15, y_offset))
+            y_offset += 18
         
         y_offset += 20
         
         # Hover information
         if self.hover_day is not None and self.hover_hour is not None:
-            self.draw_hover_info(panel_x + 20, y_offset)
+            self.draw_hover_info(panel_x + 15, y_offset)
             y_offset += 120
         
         # Selected pixel detailed information
         if self.selected_day is not None and self.selected_hour is not None:
-            self.draw_detailed_info(panel_x + 20, y_offset)
+            self.draw_detailed_info(panel_x + 15, y_offset)
+    
+    def draw_scrollbar(self):
+        """Draw scrollbar if content is scrollable."""
+        if self.max_scroll_y <= 0:
+            return
+        
+        # Scrollbar area
+        scrollbar_x = self.viewport_width - 20
+        scrollbar_y = 0
+        scrollbar_width = 15
+        scrollbar_height = self.viewport_height
+        
+        # Background
+        scrollbar_rect = pygame.Rect(scrollbar_x, scrollbar_y, scrollbar_width, scrollbar_height)
+        pygame.draw.rect(self.screen, self.ui_colors['scrollbar'], scrollbar_rect)
+        
+        # Thumb
+        thumb_ratio = self.viewport_height / self.vis_height
+        thumb_height = max(20, int(scrollbar_height * thumb_ratio))
+        thumb_y = int((self.scroll_y / self.max_scroll_y) * (scrollbar_height - thumb_height))
+        
+        thumb_rect = pygame.Rect(scrollbar_x + 2, thumb_y, scrollbar_width - 4, thumb_height)
+        pygame.draw.rect(self.screen, self.ui_colors['scrollbar_thumb'], thumb_rect)
+        pygame.draw.rect(self.screen, self.ui_colors['border'], thumb_rect, 1)
     
     def draw_hover_info(self, x, y):
         """Draw hover information for current mouse position."""
@@ -390,13 +476,29 @@ class InteractiveTimePixel:
             self.current_palette_idx = (self.current_palette_idx + 1) % len(self.palette_options)
             self.color_palette = create_palette(self.palette_options[self.current_palette_idx])
             print(f"Switched to {self.palette_options[self.current_palette_idx]} palette")
-            # Note: Would need to regenerate pixels for full palette change
         elif key == pygame.K_t:
             # Toggle twilight info
             self.show_twilight_info = not self.show_twilight_info
             print(f"Twilight info: {'ON' if self.show_twilight_info else 'OFF'}")
+        elif key == pygame.K_UP:
+            # Scroll up
+            self.scroll_y = max(0, self.scroll_y - self.scroll_speed)
+        elif key == pygame.K_DOWN:
+            # Scroll down
+            self.scroll_y = min(self.max_scroll_y, self.scroll_y + self.scroll_speed)
+        elif key == pygame.K_HOME:
+            # Go to top
+            self.scroll_y = 0
+        elif key == pygame.K_END:
+            # Go to bottom
+            self.scroll_y = self.max_scroll_y
         
         return True
+    
+    def handle_mouse_scroll(self, y_scroll):
+        """Handle mouse wheel scrolling."""
+        scroll_amount = y_scroll * self.scroll_speed
+        self.scroll_y = max(0, min(self.max_scroll_y, self.scroll_y - scroll_amount))
     
     def run(self):
         """Main interactive loop."""
@@ -406,11 +508,14 @@ class InteractiveTimePixel:
         print("\n🎮 INTERACTIVE MODE STARTED")
         print("Controls:")
         print("  • Click any pixel to see detailed astronomical data")
+        print("  • Mouse wheel or ↑↓ arrows - Scroll through days")
         print("  • P - Change color palette")
         print("  • T - Toggle twilight information")
+        print("  • Home/End - Jump to top/bottom")
         print("  • ESC - Exit")
-        print(f"\nPixel size: {self.pixel_size}x{self.pixel_size} for easy interaction")
-        print(f"Visualization: {self.vis_width}x{self.vis_height}")
+        print(f"\nWindow: {self.window_width}x{self.window_height}")
+        print(f"Pixel size: {self.pixel_size}x{self.pixel_size}")
+        print(f"Scrollable content: {self.vis_height}px")
         
         while running:
             for event in pygame.event.get():
@@ -419,6 +524,9 @@ class InteractiveTimePixel:
                 
                 elif event.type == pygame.KEYDOWN:
                     running = self.handle_key_press(event.key)
+                
+                elif event.type == pygame.MOUSEWHEEL:
+                    self.handle_mouse_scroll(event.y)
                 
                 elif event.type == pygame.MOUSEMOTION:
                     # Update hover state
@@ -439,6 +547,7 @@ class InteractiveTimePixel:
                                     phase = self.moon_calculator.get_moon_phase_name(day_data['date'])
                                     illumination = self.moon_calculator.get_moon_illumination(day_data['date'])
                                     print(f"   Moon: {phase} ({illumination:.1%} illuminated)")
+                                    print(f"   Scroll position: {self.scroll_y}/{self.max_scroll_y}")
             
             # Update pixel surface if hover changed
             if self.hover_day is not None or self.selected_day is not None:
@@ -447,8 +556,16 @@ class InteractiveTimePixel:
             # Draw everything
             self.screen.fill(self.ui_colors['background'])
             
-            # Draw main visualization
-            self.screen.blit(self.pixel_surface, (0, 0))
+            # Create viewport of the visualization
+            visible_rect = pygame.Rect(0, self.scroll_y, self.viewport_width, self.viewport_height)
+            self.viewport_surface.fill((0, 0, 0))
+            self.viewport_surface.blit(self.pixel_surface, (0, -self.scroll_y))
+            
+            # Draw viewport to screen
+            self.screen.blit(self.viewport_surface, (0, 0))
+            
+            # Draw scrollbar
+            self.draw_scrollbar()
             
             # Draw UI panel
             self.draw_ui_panel()
