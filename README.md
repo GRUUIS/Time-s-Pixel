@@ -35,7 +35,7 @@ The visualization will treat each day as a pixel, colored and shaped by its uniq
 2. Follow the instructions to download and clean the data.
 3. Run the visualization script to generate the artwork.
 
-## Recent Enhancements (2024 Updates)
+## Recent Enhancements (Updates)
 
 The project has been significantly enhanced with advanced astronomical calculations, interactive visualizations, and multiple viewing modes:
 
