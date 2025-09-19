@@ -10,11 +10,11 @@ from datetime import datetime
 
 # Import our enhanced modules
 try:
-    from twilight_calculator import AdvancedSkyPalette, TwilightCalculator
-    from time_utils import load_astronomical_data, get_day_data, hour_to_time
-    from moon_phases import MoonPhaseCalculator, EnhancedMoonVisualizer
-    from color_palettes import create_palette
-    from seasonal_markers import SeasonalMarkerRenderer, SeasonalMarkerInfo, AstronomicalEvents
+    from src.core.twilight_calculator import AdvancedSkyPalette, TwilightCalculator
+    from src.core.time_utils import load_astronomical_data, get_day_data, hour_to_time
+    from src.core.moon_phases import MoonPhaseCalculator, EnhancedMoonVisualizer
+    from src.core.color_palettes import create_palette
+    from src.core.seasonal_markers import SeasonalMarkerRenderer, SeasonalMarkerInfo, AstronomicalEvents
 except ImportError as e:
     print(f"Error importing modules: {e}")
     sys.exit(1)

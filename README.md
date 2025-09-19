@@ -2,38 +2,67 @@
 
 Time's Pixel is a data visualization project that blends meteorological data with artistic expression. By using daily sunrise, sunset, and moon time data from Hong Kong, the project transforms temporal patterns into visual art, exploring the rhythm of nature and the passage of time through creative coding.
 
-## Project Vision
+## Project Structure
 
-This project aims to:
-- Visualize the interplay between sunlight and moonlight over the course of a year.
-- Express the concept of time as a mosaic or pixelated artwork, where each day is a unique pixel shaped by natural phenomena.
-- Encourage viewers to reflect on the cyclical beauty of time and its impact on our environment.
+The project has been reorganized into a clear modular structure:
 
-## Data Source
+```
+Time-s-Pixel/
+├── README.md                          # Project documentation
+├── data/                              # Raw and processed CSV data
+├── docs/                              # Additional documentation
+├── output/                            # Generated images and animations
+├── src/                               # Source code modules
+│   ├── core/                          # Core astronomical calculations
+│   │   ├── time_utils.py              # Time parsing and data loading
+│   │   ├── color_palettes.py          # Color scheme definitions
+│   │   ├── moon_phases.py             # Moon phase calculations
+│   │   ├── twilight_calculator.py     # Advanced sky color calculations
+│   │   └── seasonal_markers.py        # Seasonal event markers
+│   ├── data_processing/               # Data cleaning and processing
+│   │   ├── download_data.py           # Download astronomical data
+│   │   └── check_data.py              # Clean and validate data
+│   └── visualizations/                # Visualization implementations
+│       ├── timelapse_visualization.py # Hong Kong skyline time-lapse
+│       ├── interactive_visualization.py # Interactive pixel grid
+│       ├── circular_visualization.py  # Radial time display
+│       ├── enhanced_visualization.py  # Enhanced pixel art
+│       └── other visualization files...
+├── interactive_visualization.py       # Quick launcher for interactive mode
+├── timelapse_visualization.py         # Quick launcher for timelapse mode
+└── Legacy compatibility files...
+```
 
-The primary dataset is sourced from the Hong Kong Observatory's open data API:
-- [Sunrise, Sunset, and Moon Time Data (2024)](https://data.weather.gov.hk/weatherAPI/opendata/opendata.php?dataType=SRS&year=2024&rformat=csv)
+## Quick Start
 
-This dataset includes:
-- Daily sunrise and sunset times
-- Duration of daylight
-- Moonrise and moonset times
+### Method 1: Using Launcher Scripts (Recommended)
+```bash
+# Interactive pixel grid visualization
+python interactive_visualization.py
 
-## Workflow
+# Hong Kong skyline time-lapse
+python timelapse_visualization.py
+```
 
-1. **Data Acquisition & Cleaning**: Download and preprocess the CSV data to ensure accuracy and usability.
-2. **Feature Extraction**: Parse and structure the data to extract sunrise, sunset, daylight duration, and moon time.
-3. **Creative Visualization**: Develop an artistic representation using the processed data, experimenting with pixel art, generative patterns, or other visual metaphors.
+### Method 2: Direct Module Access
+```bash
+# Run specific visualizations
+python -m src.visualizations.circular_visualization
+python -m src.visualizations.enhanced_visualization
+```
 
-## Artistic Approach
+## Data Processing
 
-The visualization will treat each day as a pixel, colored and shaped by its unique solar and lunar timings. The result will be a tapestry of time, revealing hidden patterns and inviting new interpretations of daily cycles.
+### Download and Clean Data
+```bash
+# Download fresh data from Hong Kong Observatory
+python -m src.data_processing.download_data
 
-## Getting Started
+# Clean and validate the data (preserves NaN for missing astronomical events)
+python -m src.data_processing.check_data
+```
 
-1. Clone the repository.
-2. Follow the instructions to download and clean the data.
-3. Run the visualization script to generate the artwork.
+**Important**: The data cleaning process now correctly preserves NaN values for days when moon doesn't rise or set, ensuring astronomical accuracy.
 
 ## Recent Enhancements (Updates)
 

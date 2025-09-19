@@ -9,9 +9,9 @@ import os
 
 # Import our enhanced modules
 try:
-    from color_palettes import create_palette
-    from time_utils import load_astronomical_data, get_day_data
-    from moon_phases import MoonPhaseCalculator, EnhancedMoonVisualizer
+    from src.core.color_palettes import create_palette
+    from src.core.time_utils import load_astronomical_data, get_day_data
+    from src.core.moon_phases import MoonPhaseCalculator, EnhancedMoonVisualizer
 except ImportError as e:
     print(f"Error importing modules: {e}")
     sys.exit(1)
@@ -219,8 +219,8 @@ def compare_moon_accuracy():
     print("\n🔬 ACCURACY COMPARISON")
     print("="*50)
     
-    from color_palettes import get_moon_phase
-    from time_utils import date_to_day_of_year
+    from src.core.color_palettes import get_moon_phase
+    from src.core.time_utils import date_to_day_of_year
     
     moon_calculator = MoonPhaseCalculator()
     

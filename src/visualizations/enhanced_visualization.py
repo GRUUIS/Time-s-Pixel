@@ -9,8 +9,8 @@ import os
 
 # Import our new modules
 try:
-    from color_palettes import create_palette, get_moon_phase
-    from time_utils import load_astronomical_data, get_day_data, generate_hour_pixels
+    from src.core.color_palettes import create_palette, get_moon_phase
+    from src.core.time_utils import load_astronomical_data, get_day_data, generate_hour_pixels
 except ImportError as e:
     print(f"Error importing modules: {e}")
     print("Make sure color_palettes.py and time_utils.py are in the same directory")

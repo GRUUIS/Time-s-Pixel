@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Time's Pixel - Interactive Visualization Launcher
+Time's Pixel - Timelapse Visualization Launcher
 Compatible entry point for the reorganized project structure.
 """
 
@@ -11,11 +11,11 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
-    # Import and run the interactive visualization
-    from src.visualizations.interactive_visualization import InteractiveTimePixel
+    # Import and run the timelapse visualization
+    from src.visualizations.timelapse_visualization import TimeLapseVisualization
     
-    print("Starting Time's Pixel Interactive Visualization...")
+    print("Starting Time's Pixel Timelapse Visualization...")
     print("Using reorganized project structure with src/ folder.")
     
-    app = InteractiveTimePixel()
+    app = TimeLapseVisualization()
     app.run()

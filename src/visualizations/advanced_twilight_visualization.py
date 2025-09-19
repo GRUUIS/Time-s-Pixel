@@ -8,9 +8,9 @@ import sys
 
 # Import our advanced modules
 try:
-    from twilight_calculator import AdvancedSkyPalette, TwilightCalculator
-    from time_utils import load_astronomical_data, get_day_data
-    from moon_phases import MoonPhaseCalculator, EnhancedMoonVisualizer
+    from src.core.twilight_calculator import AdvancedSkyPalette, TwilightCalculator
+    from src.core.time_utils import load_astronomical_data, get_day_data
+    from src.core.moon_phases import MoonPhaseCalculator, EnhancedMoonVisualizer
 except ImportError as e:
     print(f"Error importing modules: {e}")
     sys.exit(1)
@@ -185,7 +185,7 @@ def create_twilight_comparison_image():
     print(f"\n🎨 CREATING TWILIGHT COMPARISON")
     print("="*50)
     
-    from color_palettes import ColorPalette
+    from src.core.color_palettes import ColorPalette
     
     # Initialize both palette systems
     basic_palette = ColorPalette()
