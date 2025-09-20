@@ -1,6 +1,8 @@
 # Time's Pixel
 
-**Astronomical Data Visualization Suite** - Transform Hong Kong's daily sun and moon cycles into interactive art and animations. Experience time through pixels, spirals, and cosmic patterns.
+## Project Overview
+
+This project visualizes Hong Kong's 2024 astronomical data(sunrise/sunset/moonrise/moonset) through pixel art and interactive animations, transforming temporal patterns into visual narratives. Experience time through pixels, spirals, and cosmic patterns.
 
 ## 🚀 Quick Start
 
