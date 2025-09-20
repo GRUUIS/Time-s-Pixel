@@ -6,7 +6,13 @@ Days are arranged in a circle, hours radiate inward/outward from center.
 import pygame
 import math
 import sys
+import os
 from datetime import datetime
+
+# Add project root to Python path for imports
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 # Import our enhanced modules
 try:
@@ -17,6 +23,8 @@ try:
     from src.core.seasonal_markers import SeasonalMarkerRenderer, SeasonalMarkerInfo, AstronomicalEvents
 except ImportError as e:
     print(f"Error importing modules: {e}")
+    print(f"Project root: {project_root}")
+    print(f"Python path: {sys.path}")
     sys.exit(1)
 
 class CircularTimeMapper:
