@@ -26,23 +26,23 @@ class TimePixelMainMenu:
         self.max_scroll = 0
         self.scroll_speed = 30
         
-        # Layout constants
-        self.card_width = 380
-        self.card_height = 260
-        self.card_margin = 30
-        self.header_height = 120
-        self.footer_height = 100
+        # Layout constants (optimized for better spacing)
+        self.card_width = 240
+        self.card_height = 220
+        self.card_margin = 25
+        self.header_height = 100
+        self.footer_height = 80
         
-        # Colors
+        # Colors (refined modern theme)
         self.colors = {
-            'background': (15, 25, 35),      # Dark blue
-            'card_bg': (25, 35, 50),         # Slightly lighter blue
-            'card_hover': (35, 50, 70),      # Hover state
-            'text_primary': (255, 255, 255), # White
-            'text_secondary': (180, 190, 200), # Light gray
-            'accent': (100, 150, 255),       # Blue accent
-            'button': (50, 120, 200),        # Button blue
-            'button_hover': (70, 140, 220),  # Button hover
+            'background': (18, 28, 38),      # Darker modern blue
+            'card_bg': (28, 40, 56),         # Card background
+            'card_hover': (40, 56, 76),      # Hover state
+            'text_primary': (245, 248, 250), # Off-white
+            'text_secondary': (165, 180, 195), # Light gray
+            'accent': (88, 144, 255),        # Brighter accent blue
+            'button': (88, 144, 255),        # Primary button color
+            'button_hover': (108, 164, 255), # Button hover
         }
         
         # Fonts
@@ -62,51 +62,51 @@ class TimePixelMainMenu:
         self.menu_items = [
             # Interactive Visualizations
             {
-                'title': '🌅 Timelapse Animation',
+                'title': 'Timelapse Animation',
                 'subtitle': 'Hong Kong Skyline Journey',
-                'description': 'Experience a full year of Hong Kong sunrises and sunsets with realistic skyline animation.',
-                'features': ['16:9 Optimized Display', 'Adaptive Screen Sizing', '20% Viewport Cropping', 'F11 Fullscreen Mode'],
+                'description': 'Full year Hong Kong sunrises and sunsets animation.',
+                'features': ['Optimized Display', 'Fullscreen Mode', 'Adaptive Sizing'],
                 'script': 'scripts/run_timelapse.py',
                 'category': 'interactive'
             },
             {
-                'title': '🌀 3D Time Spiral',
+                'title': '3D Time Spiral',
                 'subtitle': 'Innovative Temporal Structure',
-                'description': 'Explore time as a beautiful 3D spiral where each day becomes a point in space.',
-                'features': ['Custom 3D Engine', 'Interactive Rotation', 'Astronomical Mapping', 'Moon Phase Colors'],
+                'description': 'Time visualized as an interactive 3D spiral.',
+                'features': ['3D Engine', 'Interactive Rotation', 'Moon Phases'],
                 'script': 'scripts/run_spiral_3d.py',
                 'category': 'interactive'
             },
             {
-                'title': '🎯 Interactive Explorer',
+                'title': 'Interactive Explorer',
                 'subtitle': 'Click-to-Discover Interface',
-                'description': 'Navigate through time with pixel-perfect precision and detailed astronomical data.',
-                'features': ['Pixel-level Interaction', 'Smooth Scrolling', 'Real-time Data Display', 'Multiple Palettes'],
+                'description': 'Navigate time with pixel-perfect precision.',
+                'features': ['Pixel Interaction', 'Smooth Scrolling', 'Multiple Palettes'],
                 'script': 'scripts/run_interactive.py',
                 'category': 'interactive'
             },
-            # Static Image Display
+            # Dynamic Circular Visualization
             {
-                'title': '🎨 Enhanced Pixel Art',
-                'subtitle': 'View High-Resolution Artwork',
-                'description': 'View beautiful pixel art representations of astronomical data with enhanced colors and palettes.',
-                'features': ['High Resolution Display', 'Multiple Color Palettes', 'Seasonal Markers', 'Moon Phase Integration'],
-                'script': 'scripts/image_generation/run_enhanced_pixel_art.py',
-                'category': 'static'
+                'title': 'Dynamic Circular Clock',
+                'subtitle': 'Interactive Radial Time Explorer',
+                'description': 'Dynamic circular time visualization with interaction.',
+                'features': ['Real-time Navigation', 'Seasonal Markers', 'Click Exploration'],
+                'script': 'src/visualizations/circular_visualization.py',
+                'category': 'interactive'
             },
             {
-                'title': '⭕ Circular Cosmic Clock',
+                'title': 'Circular Cosmic Clock',
                 'subtitle': 'View Radial Time Art',
-                'description': 'View circular visualizations that show the cosmic rhythm of time in Hong Kong.',
-                'features': ['Circular Layout', 'Radial Time Mapping', 'Cosmic Design', 'Full Resolution'],
+                'description': 'Static circular visualization of Hong Kong time.',
+                'features': ['Circular Layout', 'Cosmic Design', 'High Resolution'],
                 'script': 'scripts/image_generation/run_circular_clock.py',
                 'category': 'static'
             },
             {
-                'title': '🌙 Moon Phase Analysis',
+                'title': 'Moon Phase Analysis',
                 'subtitle': 'View Lunar Cycle Art',
-                'description': 'View detailed moon phase visualizations with accurate lunar cycle data and beautiful design.',
-                'features': ['Accurate Moon Phases', 'Lunar Calendar', 'Phase Progression', 'Scientific Data'],
+                'description': 'Detailed moon phase visualizations and data.',
+                'features': ['Accurate Phases', 'Lunar Calendar', 'Scientific Data'],
                 'script': 'scripts/image_generation/run_moon_analysis.py',
                 'category': 'static'
             }
@@ -132,16 +132,33 @@ class TimePixelMainMenu:
         self.calculate_max_scroll()
     
     def calculate_layout(self):
-        """Calculate card positions for both categories"""
+        """Calculate card positions for both categories with improved spacing"""
+        # Interactive row - check if cards fit in one row
+        max_cards_per_row = (self.width - 2 * self.card_margin) // (self.card_width + self.card_margin)
+        
         # Interactive row
-        interactive_width = len(self.interactive_items) * self.card_width + (len(self.interactive_items) - 1) * self.card_margin
-        self.interactive_start_x = (self.width - interactive_width) // 2
-        self.interactive_y = self.header_height + 60
+        interactive_count = len(self.interactive_items)
+        if interactive_count <= max_cards_per_row:
+            # Single row
+            interactive_width = interactive_count * self.card_width + (interactive_count - 1) * self.card_margin
+            self.interactive_start_x = (self.width - interactive_width) // 2
+            self.interactive_y = self.header_height + 40
+        else:
+            # Multi-row layout (if needed in future)
+            self.interactive_start_x = self.card_margin
+            self.interactive_y = self.header_height + 40
         
         # Static row
-        static_width = len(self.static_items) * self.card_width + (len(self.static_items) - 1) * self.card_margin
-        self.static_start_x = (self.width - static_width) // 2
-        self.static_y = self.interactive_y + self.card_height + 80
+        static_count = len(self.static_items)
+        if static_count <= max_cards_per_row:
+            # Single row
+            static_width = static_count * self.card_width + (static_count - 1) * self.card_margin
+            self.static_start_x = (self.width - static_width) // 2
+            self.static_y = self.interactive_y + self.card_height + 60
+        else:
+            # Multi-row layout (if needed in future)
+            self.static_start_x = self.card_margin
+            self.static_y = self.interactive_y + self.card_height + 60
     
     def calculate_max_scroll(self):
         """Calculate the maximum scroll distance needed"""
@@ -207,7 +224,7 @@ class TimePixelMainMenu:
         """Launch a visualization script"""
         try:
             full_path = os.path.join(self.project_root, script_path)
-            print(f"🚀 Launching: {script_path}")
+            print(f"Launching: {script_path}")
             print(f"Python: {sys.executable}")
             print(f"Script: {full_path}")
             
@@ -215,12 +232,12 @@ class TimePixelMainMenu:
                 result = subprocess.run([sys.executable, full_path], 
                                       cwd=self.project_root,
                                       capture_output=False)
-                print(f"✅ Visualization completed with code: {result.returncode}")
+                print(f"Visualization completed with code: {result.returncode}")
             else:
-                print(f"❌ Script not found: {full_path}")
+                print(f"Script not found: {full_path}")
                 
         except Exception as e:
-            print(f"❌ Error launching visualization: {e}")
+            print(f"Error launching visualization: {e}")
     
     def handle_mouse_click(self, pos):
         """Handle mouse clicks on buttons"""
@@ -282,13 +299,15 @@ class TimePixelMainMenu:
                 self.mouse_pos = event.pos
     
     def draw_header(self):
-        """Draw the header with title and subtitle"""
+        """Draw the header with improved styling"""
+        # Main title
         title_text = self.font_title.render("Time's Pixel", True, self.colors['text_primary'])
-        title_rect = title_text.get_rect(center=(self.width // 2, 40))
+        title_rect = title_text.get_rect(center=(self.width // 2, 35))
         self.screen.blit(title_text, title_rect)
         
-        subtitle_text = self.font_body.render("Enhanced Visualization Suite - Choose Your Experience", True, self.colors['accent'])
-        subtitle_rect = subtitle_text.get_rect(center=(self.width // 2, 80))
+        # Subtitle with better spacing
+        subtitle_text = self.font_body.render("Enhanced Visualization Suite", True, self.colors['accent'])
+        subtitle_rect = subtitle_text.get_rect(center=(self.width // 2, 70))
         self.screen.blit(subtitle_text, subtitle_rect)
     
     def draw_categories(self):
@@ -296,14 +315,14 @@ class TimePixelMainMenu:
         # Interactive category header
         interactive_y = self.interactive_y - 40 - self.scroll_y
         if interactive_y > -30 and interactive_y < self.height:
-            interactive_text = self.font_subtitle.render("🎮 Interactive Visualizations", True, self.colors['accent'])
+            interactive_text = self.font_subtitle.render("Interactive Visualizations", True, self.colors['accent'])
             interactive_rect = interactive_text.get_rect(center=(self.width // 2, interactive_y))
             self.screen.blit(interactive_text, interactive_rect)
         
         # Static category header  
         static_y = self.static_y - 40 - self.scroll_y
         if static_y > -30 and static_y < self.height:
-            static_text = self.font_subtitle.render("🖼️ Static Image Gallery", True, self.colors['accent'])
+            static_text = self.font_subtitle.render("Static Image Gallery", True, self.colors['accent'])
             static_rect = static_text.get_rect(center=(self.width // 2, static_y))
             self.screen.blit(static_text, static_rect)
     
@@ -383,7 +402,7 @@ class TimePixelMainMenu:
         # Launch button
         pygame.draw.rect(self.screen, button_color, button_rect, border_radius=8)
         
-        button_text_content = "🚀 Launch" if is_interactive else "🖼️ View"
+        button_text_content = "Launch" if is_interactive else "View"
         button_text = self.font_body.render(button_text_content, True, (255, 255, 255))
         button_text_rect = button_text.get_rect(center=button_rect.center)
         self.screen.blit(button_text, button_text_rect)
@@ -409,17 +428,16 @@ class TimePixelMainMenu:
         footer_y = self.height - 80
         
         instructions = [
-            "🖱️ Mouse wheel or ↑↓ arrows to scroll • Click buttons to launch/view",
-            "⌨️ Press 1-6 for quick access • ESC to exit",
-            "🎮 Tip: Try the Timelapse Animation first for the best experience!"
+            "Scroll: Mouse wheel/arrows • Click: Launch • 1-6: Quick access • ESC: Exit",
+            "Tip: Try Timelapse Animation first!"
         ]
         
         for i, instruction in enumerate(instructions):
-            color = self.colors['accent'] if i == 2 else self.colors['text_secondary']
-            font = self.font_body if i == 2 else self.font_small
+            color = self.colors['accent'] if i == 1 else self.colors['text_secondary']
+            font = self.font_body if i == 1 else self.font_small
             
             text = font.render(instruction, True, color)
-            text_rect = text.get_rect(center=(self.width // 2, footer_y + i * 22))
+            text_rect = text.get_rect(center=(self.width // 2, footer_y + i * 25))
             self.screen.blit(text, text_rect)
     
     def draw(self):
@@ -450,25 +468,20 @@ class TimePixelMainMenu:
     
     def run(self):
         """Main menu loop"""
-        print("🎨 Time's Pixel - Enhanced Main Menu")
-        print("=" * 60)
-        print("Welcome to the comprehensive Time's Pixel visualization suite!")
-        print("Choose from 6 amazing ways to explore astronomical data:")
+        print("Time's Pixel - Main Menu")
+        print("=" * 40)
+        print("Astronomical Data Visualization Suite")
         print()
-        print("🎮 INTERACTIVE VISUALIZATIONS:")
+        print("INTERACTIVE VISUALIZATIONS:")
         for i, item in enumerate(self.interactive_items, 1):
-            print(f"  {i}. {item['title']} - {item['subtitle']}")
+            print(f"  {i}. {item['title']}")
         print()
-        print("🖼️ STATIC IMAGE GALLERY:")
+        print("STATIC IMAGE GALLERY:")
         for i, item in enumerate(self.static_items, 4):
-            print(f"  {i}. {item['title']} - {item['subtitle']}")
+            print(f"  {i}. {item['title']}")
         print()
-        print("🎮 Controls:")
-        print("  • Click buttons to launch visualizations or view images")
-        print("  • Mouse wheel or arrow keys to scroll")
-        print("  • Press 1-6 for quick access")
-        print("  • ESC to exit")
-        print("=" * 60)
+        print("Controls: Click buttons, scroll, press 1-6, ESC to exit")
+        print("=" * 40)
         
         while self.running:
             self.handle_events()
@@ -477,23 +490,23 @@ class TimePixelMainMenu:
             self.clock.tick(60)
         
         pygame.quit()
-        print("\\n👋 Thanks for exploring Time's Pixel!")
+        print("\\nThanks for using Time's Pixel!")
 
 def main():
     """Main function"""
     # Check if we're in the right directory
     if not os.path.exists('src'):
-        print("⚠️  Warning: Please run this script from the Time-s-Pixel root directory")
-        print("💡 Current directory should contain 'src', 'scripts', and 'data' folders")
+        print("Warning: Please run this script from the Time-s-Pixel root directory")
+        print("Current directory should contain 'src', 'scripts', and 'data' folders")
     
     try:
         menu = TimePixelMainMenu()
         menu.run()
     except KeyboardInterrupt:
-        print("\\n👋 Menu closed by user")
+        print("\\nMenu closed by user")
     except Exception as e:
-        print(f"❌ Error running menu: {e}")
-        print("💡 Make sure pygame is installed: pip install pygame")
+        print(f"Error running menu: {e}")
+        print("Make sure pygame is installed: pip install pygame")
 
 if __name__ == "__main__":
     main()

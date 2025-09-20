@@ -2,7 +2,7 @@
 
 Time's Pixel is a data visualization project that blends meteorological data with artistic expression. By using daily sunrise, sunset, and moon time data from Hong Kong, the project transforms temporal patterns into visual art, exploring the rhythm of nature and the passage of time through creative coding.
 
-## 🚀 Latest Updates (2025)
+## 🚀 Updates 
 
 ### ✨ Enhanced Menu System with 6 Visualization Options
 The project now features a comprehensive pygame-based menu system that provides unified access to both interactive and static visualization modes:
