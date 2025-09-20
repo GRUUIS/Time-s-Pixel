@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from PIL import Image, ImageDraw
+import os
 
 # Configurable parameters
 IMG_WIDTH = 24  # hours in a day
@@ -9,9 +10,13 @@ BRIGHT_COLOR = (255, 255, 180)  # Daytime pixel color
 NIGHT_COLOR = (30, 30, 60)      # Night pixel color
 MOON_COLOR = (180, 180, 255)    # Moon pixel overlay
 
+# Get the project root directory
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+data_dir = os.path.join(project_root, 'data')
+
 # Load cleaned sun and moon data
-sun_df = pd.read_csv('hongkong_sunrise_sunset_2024_clean.csv')
-moon_df = pd.read_csv('moonrise_moonset_2024_clean.csv')
+sun_df = pd.read_csv(os.path.join(data_dir, 'hongkong_sunrise_sunset_2024_clean.csv'))
+moon_df = pd.read_csv(os.path.join(data_dir, 'moonrise_moonset_2024_clean.csv'))
 
 # Helper to convert HH:MM to hour as float
 def time_to_hour(t):

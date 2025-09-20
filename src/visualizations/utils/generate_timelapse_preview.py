@@ -9,10 +9,19 @@ from datetime import datetime, timedelta
 
 # Import our time-lapse components
 try:
-    from timelapse_visualization import HongKongSkylineRenderer, SkyAnimationEngine
+    from ..timelapse_visualization import HongKongSkylineRenderer, SkyAnimationEngine
 except ImportError as e:
     print(f"Error importing time-lapse modules: {e}")
-    sys.exit(1)
+    print("Trying absolute import...")
+    try:
+        import sys
+        import os
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        sys.path.insert(0, project_root)
+        from src.visualizations.timelapse_visualization import HongKongSkylineRenderer, SkyAnimationEngine
+    except ImportError as e2:
+        print(f"Absolute import also failed: {e2}")
+        sys.exit(1)
 
 def generate_timelapse_preview():
     """Generate a preview showing Hong Kong skyline at 6 different times."""

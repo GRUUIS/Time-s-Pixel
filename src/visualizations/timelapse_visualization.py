@@ -986,12 +986,72 @@ class SkyAnimationEngine:
 class TimeLapseVisualization:
     """Main class combining Hong Kong skyline with animated sky."""
     
-    def __init__(self, width: int = 1200, height: int = 800):
+    @staticmethod
+    def calculate_optimal_size(target_ratio: float = 16/9, max_screen_usage: float = 0.9):
+        """
+        Calculate optimal window size based on screen resolution.
+        
+        Args:
+            target_ratio: Desired aspect ratio (width/height). Default is 16:9
+            max_screen_usage: Maximum percentage of screen to use. Default is 90%
+        
+        Returns:
+            tuple: (width, height) for optimal window size
+        """
         pygame.init()
+        
+        # Get screen resolution
+        info = pygame.display.Info()
+        screen_width = info.current_w
+        screen_height = info.current_h
+        
+        # Calculate maximum usable area (leaving some space for taskbar/dock)
+        max_width = int(screen_width * max_screen_usage)
+        max_height = int(screen_height * max_screen_usage)
+        
+        # Calculate optimal size maintaining aspect ratio
+        if max_width / max_height > target_ratio:
+            # Screen is wider than target ratio, limit by height
+            optimal_height = max_height
+            optimal_width = int(optimal_height * target_ratio)
+        else:
+            # Screen is taller than target ratio, limit by width
+            optimal_width = max_width
+            optimal_height = int(optimal_width / target_ratio)
+        
+        # Ensure minimum size
+        min_width, min_height = 800, 450  # Minimum 16:9 size
+        optimal_width = max(optimal_width, min_width)
+        optimal_height = max(optimal_height, min_height)
+        
+        return optimal_width, optimal_height
+    
+    def __init__(self, width: int = None, height: int = None, fullscreen: bool = False, crop_left_percent: float = 0.2):
+        pygame.init()
+        
+        # Auto-calculate optimal size if not provided
+        if width is None or height is None:
+            width, height = self.calculate_optimal_size()
         
         self.width = width
         self.height = height
-        self.screen = pygame.display.set_mode((width, height))
+        self.fullscreen = fullscreen
+        self.offset_x = 0  # For fullscreen centering
+        self.offset_y = 0  # For fullscreen centering
+        
+        # Viewport cropping settings
+        self.crop_left_percent = crop_left_percent  # Percentage of left side to crop (0.2 = 20%)
+        self.viewport_x = int(width * crop_left_percent)  # Starting X coordinate of viewport
+        self.viewport_width = width - self.viewport_x  # Actual viewport width
+        self.content_width = width  # Actual content width (for coordinate calculations)
+        self.content_height = height  # Actual content height
+        
+        # Set display mode
+        if fullscreen:
+            self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode((width, height))
+        
         pygame.display.set_caption("Time's Pixel - Hong Kong Time Lapse")
         
         # Initialize components
@@ -1009,6 +1069,7 @@ class TimeLapseVisualization:
         self.font_small = pygame.font.Font(None, 18)
         
         print("Hong Kong Time Lapse Visualization initialized!")
+        print(f"Viewport crop: {self.crop_left_percent*100:.0f}% left side cropped")
         print("Controls:")
         print("  SPACE - Pause/Resume animation")
         print("  ← → - Change animation speed (0.01x to 5.0x)")
@@ -1017,6 +1078,7 @@ class TimeLapseVisualization:
         print("  1-9 - Quick time range presets")
         print("  T - Toggle time range loop")
         print("  R - Reset to day 1")
+        print("  F11 - Toggle fullscreen")
         print("  ESC - Exit")
         print()
         print("Time Range Presets:")
@@ -1030,7 +1092,67 @@ class TimeLapseVisualization:
         print("  8 - Autumn season")
         print("  9 - Winter season")
         print("  R - Reset to day 1")
+        print("  F11 - Toggle fullscreen")
         print("  ESC - Exit")
+    
+    def toggle_fullscreen(self):
+        """Toggle between fullscreen and windowed mode."""
+        self.fullscreen = not self.fullscreen
+        
+        if self.fullscreen:
+            # Switch to fullscreen mode
+            info = pygame.display.Info()
+            screen_width = info.current_w
+            screen_height = info.current_h
+            
+            # Calculate best fit for 16:9 ratio in fullscreen
+            target_ratio = 16/9
+            if screen_width / screen_height > target_ratio:
+                # Screen is wider, fit by height
+                fit_height = screen_height
+                fit_width = int(fit_height * target_ratio)
+                self.offset_x = (screen_width - fit_width) // 2
+                self.offset_y = 0
+            else:
+                # Screen is taller, fit by width
+                fit_width = screen_width
+                fit_height = int(fit_width / target_ratio)
+                self.offset_x = 0
+                self.offset_y = (screen_height - fit_height) // 2
+            
+            self.width = fit_width
+            self.height = fit_height
+            self.screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+            
+            # Update viewport settings for new size
+            self.viewport_x = int(self.width * self.crop_left_percent)
+            self.viewport_width = self.width - self.viewport_x
+            self.content_width = self.width
+            self.content_height = self.height
+            
+            # Recreate components with new size
+            self.skyline_renderer = HongKongSkylineRenderer(self.content_width, self.content_height)
+            self.sky_animation = SkyAnimationEngine(self.content_width, self.content_height)
+            
+            print(f"Switched to fullscreen mode ({self.width}x{self.height})")
+        else:
+            # Switch to windowed mode
+            self.width, self.height = self.calculate_optimal_size()
+            self.offset_x = 0
+            self.offset_y = 0
+            self.screen = pygame.display.set_mode((self.width, self.height))
+            
+            # Update viewport settings for new size
+            self.viewport_x = int(self.width * self.crop_left_percent)
+            self.viewport_width = self.width - self.viewport_x
+            self.content_width = self.width
+            self.content_height = self.height
+            
+            # Recreate components with new size
+            self.skyline_renderer = HongKongSkylineRenderer(self.content_width, self.content_height)
+            self.sky_animation = SkyAnimationEngine(self.content_width, self.content_height)
+            
+            print(f"Switched to windowed mode ({self.width}x{self.height})")
     
     def handle_events(self) -> bool:
         """Handle user input events with enhanced time range and speed controls."""
@@ -1041,6 +1163,8 @@ class TimeLapseVisualization:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return False
+                elif event.key == pygame.K_F11:
+                    self.toggle_fullscreen()
                 elif event.key == pygame.K_SPACE:
                     self.paused = not self.paused
                     print(f"Animation {'paused' if self.paused else 'resumed'}")
@@ -1101,8 +1225,11 @@ class TimeLapseVisualization:
         
         return True
     
-    def render_ui(self):
+    def render_ui(self, surface=None):
         """Render enhanced user interface overlay with time range information."""
+        if surface is None:
+            surface = self.screen
+            
         info = self.sky_animation.get_animation_info()
         
         # Calculate UI panel size based on content
@@ -1111,7 +1238,7 @@ class TimeLapseVisualization:
         # Semi-transparent background for UI
         ui_surface = pygame.Surface((400, panel_height), pygame.SRCALPHA)
         ui_surface.fill((0, 0, 0, 128))
-        self.screen.blit(ui_surface, (10, 10))
+        surface.blit(ui_surface, (10, 10))
         
         # Time and date information
         date_text = self.font_medium.render(f"Day {info['day']}/366{info['progress_info']}", True, (255, 255, 255))
@@ -1122,13 +1249,13 @@ class TimeLapseVisualization:
         
         # Blit basic UI text
         y_offset = 20
-        self.screen.blit(date_text, (20, y_offset))
+        surface.blit(date_text, (20, y_offset))
         y_offset += 25
-        self.screen.blit(time_text, (20, y_offset))
+        surface.blit(time_text, (20, y_offset))
         y_offset += 25
-        self.screen.blit(speed_text, (20, y_offset))
+        surface.blit(speed_text, (20, y_offset))
         y_offset += 25
-        self.screen.blit(status_text, (20, y_offset))
+        surface.blit(status_text, (20, y_offset))
         y_offset += 25
         
         # Time range information if active
@@ -1137,25 +1264,28 @@ class TimeLapseVisualization:
             range_start = self.font_small.render(f"Start: {info['range_start']}", True, (255, 255, 255))
             range_end = self.font_small.render(f"End: {info['range_end']}", True, (255, 255, 255))
             
-            self.screen.blit(range_title, (20, y_offset))
+            surface.blit(range_title, (20, y_offset))
             y_offset += 20
-            self.screen.blit(range_start, (20, y_offset))
+            surface.blit(range_start, (20, y_offset))
             y_offset += 20
-            self.screen.blit(range_end, (20, y_offset))
+            surface.blit(range_end, (20, y_offset))
         
         # Controls hint (bottom right)
         controls_text = self.font_small.render("Press H for help", True, (150, 150, 150))
-        self.screen.blit(controls_text, (self.width - 120, self.height - 25))
+        surface.blit(controls_text, (self.width - 120, self.height - 25))
     
-    def render_help_overlay(self):
+    def render_help_overlay(self, surface=None):
         """Render help overlay with all controls."""
         if not self.show_help:
             return
         
+        if surface is None:
+            surface = self.screen
+        
         # Create semi-transparent overlay
         overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
-        self.screen.blit(overlay, (0, 0))
+        surface.blit(overlay, (0, 0))
         
         # Help content
         help_lines = [
@@ -1201,7 +1331,7 @@ class TimeLapseVisualization:
                 text = self.font_medium.render(line, True, (255, 255, 255))
                 x = 80
             
-            self.screen.blit(text, (x, start_y + i * 25))
+            surface.blit(text, (x, start_y + i * 25))
     
     def run(self):
         """Main animation loop."""
@@ -1216,22 +1346,31 @@ class TimeLapseVisualization:
                 delta_time = self.clock.get_time() / 1000.0 * 30  # Convert to minutes (slower pace)
                 self.sky_animation.update_animation(delta_time)
             
-            # Render frame
+            # Clear screen
             self.screen.fill((0, 0, 0))
             
-            # Render sky background
-            self.sky_animation.render_sky_gradient(self.screen)
+            # Always render to a content surface for cropping
+            content_surface = pygame.Surface((self.content_width, self.content_height))
             
-            # Render celestial bodies
-            self.sky_animation.render_celestial_bodies(self.screen)
+            # Render main content to the full-sized surface
+            self.sky_animation.render_sky_gradient(content_surface)
+            self.sky_animation.render_celestial_bodies(content_surface)
+            self.skyline_renderer.render_skyline(content_surface, self.sky_animation.is_night_time())
             
-            # Render Hong Kong skyline
-            self.skyline_renderer.render_skyline(self.screen, self.sky_animation.is_night_time())
+            # Crop the content surface (remove left 20%)
+            cropped_rect = pygame.Rect(self.viewport_x, 0, self.viewport_width, self.content_height)
+            cropped_surface = content_surface.subsurface(cropped_rect)
             
-            # Render UI
+            # Determine where to blit the cropped content
+            if self.fullscreen and (self.offset_x > 0 or self.offset_y > 0):
+                # In fullscreen with offset, position the cropped content with offset
+                self.screen.blit(cropped_surface, (self.offset_x, self.offset_y))
+            else:
+                # Direct rendering - place cropped content at screen origin
+                self.screen.blit(cropped_surface, (0, 0))
+            
+            # Render UI on top (not cropped, use full screen)
             self.render_ui()
-            
-            # Render help overlay if active
             self.render_help_overlay()
             
             # Update display

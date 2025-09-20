@@ -137,7 +137,7 @@ def generate_hour_pixels(day_data, palette, img_width=24):
     moonset = day_data['moonset']
     
     # Import here to avoid circular import
-    from color_palettes import get_moon_phase
+    from src.core.color_palettes import get_moon_phase
     moon_phase = get_moon_phase(day_of_year) if day_of_year else 0.5
     
     for hour in range(img_width):

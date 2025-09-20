@@ -6,7 +6,12 @@ Large pixel size ensures comfortable user interaction on any screen.
 import pygame
 import sys
 import math
+import os
 from datetime import datetime
+
+# Add project root to Python path for imports
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
 
 # Import our enhanced modules
 try:
@@ -16,6 +21,7 @@ try:
     from src.core.color_palettes import create_palette
 except ImportError as e:
     print(f"Error importing modules: {e}")
+    print("Make sure you're running this from the project root directory or the modules are installed")
     sys.exit(1)
 
 class InteractiveTimePixel:
