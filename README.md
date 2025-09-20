@@ -1,375 +1,162 @@
 # Time's Pixel
 
-Time's Pixel is a data visualization project that blends meteorological data with artistic expression. By using daily sunrise, sunset, and moon time data from Hong Kong, the project transforms temporal patterns into visual art, exploring the rhythm of nature and the passage of time through creative coding.
+**Astronomical Data Visualization Suite** - Transform Hong Kong's daily sun and moon cycles into interactive art and animations. Experience time through pixels, spirals, and cosmic patterns.
 
-## 🚀 Updates 
+## 🚀 Quick Start
 
-### ✨ Enhanced Menu System with 6 Visualization Options
-The project now features a comprehensive pygame-based menu system that provides unified access to both interactive and static visualization modes:
+### Main Menu (Recommended)
+```bash
+python main_menu.py
+```
+**Enhanced Menu System** featuring 6 visualization modes with clean, modern interface.
 
-#### 🎮 Interactive Visualizations
-1. **Timelapse Animation** - Hong Kong Skyline Journey
-2. **3D Time Spiral** - Innovative Temporal Structure  
-3. **Interactive Explorer** - Click-to-Discover Interface
+## 🎨 Visualization Modes
 
-#### 🖼️ Static Image Generation
-4. **Enhanced Pixel Art** - High-Resolution Static Image
-5. **Circular Cosmic Clock** - Radial Time Visualization
-6. **Moon Phase Analysis** - Lunar Cycle Visualization
+### Interactive Visualizations
+1. **Timelapse Animation** - Hong Kong skyline with realistic day/night cycles
+2. **3D Time Spiral** - Innovative temporal structure with interactive 3D navigation  
+3. **Interactive Explorer** - Click any pixel for detailed astronomical data
+4. **Dynamic Circular Clock** - Real-time radial time exploration
 
-**Menu Features:**
-- **Category-based Layout**: Clear visual separation between interactive and static modes
-- **Keyboard Shortcuts**: Press 1-6 for quick launch of any visualization
-- **Color-coded UI**: Blue theme for interactive, purple theme for static options
-- **1400x950 Window**: Optimized for displaying all 6 options comfortably
-- **Professional Styling**: Modern card-based interface with hover effects
+### Static Image Generation
+5. **Circular Cosmic Clock** - High-resolution radial time visualization
+6. **Moon Phase Analysis** - Accurate lunar cycle visualization with scientific data
 
-### 🏗️ Major Project Restructure
-The project has been completely reorganized with a professional modular architecture, featuring comprehensive visualization suite and improved user experience.
-
-### 🎨 Three Core Interactive Modes
-
-#### 1. **Timelapse Animation** (`scripts/run_timelapse.py`)
-- **16:9 Aspect Ratio**: Optimized for modern displays
-- **Adaptive Screen Sizing**: Automatically detects optimal resolution  
-- **20% Left Viewport Cropping**: Focus on core visual content
-- **Hong Kong Skyline Animation**: Realistic building silhouettes with window lighting
-- **Full-Screen Mode**: Press F11 for immersive experience
-- **Interactive Controls**: Speed adjustment, time range selection, seasonal presets
-
-#### 2. **3D Time Spiral** (`scripts/run_spiral_3d.py`)
-- **Innovative 3D Structure**: 365 days form a beautiful spiral
-- **Custom 3D Engine**: Self-built projection and rotation system
-- **Astronomical Data Mapping**: Daylight duration controls spiral height
-- **Moon Phase Color Coding**: Different lunar phases shown in unique colors
-- **Interactive Navigation**: Mouse rotation, wheel zoom, auto-rotation toggle
-
-#### 3. **Interactive Exploration** (`scripts/run_interactive.py`)
-- **Click-to-Explore**: Click any pixel for detailed astronomical data
-- **Real-time Feedback**: Instant display of sunrise, sunset, moon phase info
-- **Multiple Color Palettes**: Switch between naturalistic, vibrant, and monochrome
-- **Smooth Scrolling**: Navigate through entire year with wheel or arrow keys
-
-## Project Structure
-
-The project has been reorganized into a clear modular structure:
+## 🏗️ Project Structure
 
 ```
 Time-s-Pixel/
-├── 📊 data/                           # Astronomical data files
+├── � data/                           # Astronomical datasets
 │   ├── hongkong_sunrise_sunset_2024_clean.csv
 │   └── moonrise_moonset_2024_clean.csv
-├── 📚 docs/                           # Project documentation  
-├── 🖼️ output/                         # Generated images and animations
-├── 🐍 src/                            # Source code modules
-│   ├── core/                          # 🔧 Core functionality
-│   │   ├── time_utils.py              # Time processing utilities
-│   │   ├── color_palettes.py          # Color scheme definitions
-│   │   ├── moon_phases.py             # Moon phase calculations
-│   │   ├── twilight_calculator.py     # Advanced sky color calculations
-│   │   └── seasonal_markers.py        # Seasonal event markers
-│   ├── data_processing/               # 📊 Data handling
-│   │   ├── download_data.py           # Download astronomical data
-│   │   └── check_data.py              # Clean and validate data
-│   └── visualizations/                # 🎨 Visualization modules
-│       ├── timelapse_visualization.py    # Hong Kong skyline time-lapse
-│       ├── time_spiral_3d.py             # 3D spiral visualization
-│       ├── interactive_visualization.py  # Interactive pixel grid
+├── � src/                            # Core source code
+│   ├── core/                          # Astronomical calculations
+│   │   ├── time_utils.py              # Time processing
+│   │   ├── color_palettes.py          # Color schemes  
+│   │   ├── moon_phases.py             # Lunar calculations
+│   │   ├── twilight_calculator.py     # Sky color algorithms
+│   │   └── seasonal_markers.py        # Astronomical events
+│   ├── data_processing/               # Data handling
+│   │   ├── download_data.py           # HKO API integration
+│   │   └── check_data.py              # Data validation
+│   └── visualizations/                # Visualization engines
+│       ├── timelapse_visualization.py    # Skyline animation
+│       ├── time_spiral_3d.py             # 3D spiral
+│       ├── interactive_visualization.py  # Interactive grid
+│       ├── circular_visualization.py     # Dynamic circular
 │       ├── enhanced_visualization.py     # Enhanced pixel art
-│       ├── circular_visualization.py     # Radial time display
-│       └── utils/                        # 🛠️ Visualization utilities
+│       ├── accurate_moon_visualization.py # Moon analysis
+│       ├── advanced_twilight_visualization.py # Twilight study
+│       ├── visualize_sun_moon.py          # Basic visualization
+│       └── utils/                        # Generation utilities
 │           ├── generate_circular_image.py
 │           └── generate_timelapse_preview.py
-├── 🚀 scripts/                        # Launch scripts
-│   ├── run_timelapse.py               # Launch timelapse animation
-│   ├── run_spiral_3d.py               # Launch 3D spiral visualization  
-│   ├── run_interactive.py             # Launch interactive exploration
-│   └── examples/                      # 📁 Example scripts
-│       ├── sun_moon_365days.py
-│       ├── sun_moon_animation.py
-│       └── sun_moon_365days_pygame.py
-├── 🎮 timelapse_visualization.py      # 🌟 MAIN MENU SYSTEM 🌟
-├── 🔄 run_timelapse_direct.py         # Direct timelapse launcher (compatibility)
-└── 📋 requirements.txt                # Python dependencies
+├── � scripts/                        # Launch scripts
+│   ├── run_timelapse.py               # Timelapse launcher
+│   ├── run_spiral_3d.py               # 3D spiral launcher
+│   ├── run_interactive.py             # Interactive launcher
+│   ├── image_viewer.py                # Image display utility
+│   ├── examples/                      # Example implementations
+│   └── image_generation/              # Static image generators
+├── � output/                         # Generated content
+│   ├── images/                        # Static visualizations
+│   └── animations/                    # GIF animations
+├── 🎮 main_menu.py                    # Main menu system
+├── 🔄 timelapse_visualization.py      # Direct timelapse runner
+└── 📋 requirements.txt                # Dependencies
 ```
 
-## Quick Start
+## �️ Installation
 
-### 🎯 Main Menu (Recommended - Enhanced!)
 ```bash
-# Launch the comprehensive menu system to explore all 6 visualizations
-python timelapse_visualization.py
-```
+# Clone and setup
+git clone <repository-url>
+cd Time-s-Pixel
 
-The enhanced main menu provides:
-- **🎨 Visual Interface**: Beautiful category-based cards showing each visualization
-- **🖱️ Click-to-Launch**: Click "🚀 Launch" for interactive or "🎨 Generate" for static images
-- **⌨️ Keyboard Shortcuts**: Press 1-6 for quick launch of any visualization
-- **📋 Feature Overview**: See all capabilities with category separation
-- **🎮 Interactive Section**: Timelapse, 3D Spiral, and Interactive Explorer
-- **🖼️ Static Generation**: Enhanced Pixel Art, Circular Clock, and Moon Analysis
-
-### 🚀 Direct Launch Scripts
-```bash
-# Interactive Visualizations
-python scripts/run_timelapse.py     # 1. Timelapse Animation 
-python scripts/run_spiral_3d.py    # 2. 3D Spiral Visualization
-python scripts/run_interactive.py  # 3. Interactive Explorer
-
-# Static Image Generation
-python src/visualizations/enhanced_visualization.py          # 4. Enhanced Pixel Art
-python src/visualizations/utils/generate_circular_image.py  # 5. Circular Cosmic Clock  
-python src/visualizations/accurate_moon_visualization.py    # 6. Moon Phase Analysis
-```
-
-### 🔄 Backward Compatibility
-```bash
-# Direct timelapse launcher (maintains old behavior)
-python run_timelapse_direct.py
-```
-
-### 🛠️ Setup and Installation
-```bash
 # Create virtual environment
 python -m venv .venv
 .venv\Scripts\activate  # Windows
 source .venv/bin/activate  # macOS/Linux
 
-# Install required packages
+# Install dependencies
 pip install -r requirements.txt
-
-# Or install individually:
-# pip install pygame pandas numpy pillow imageio
 ```
 
-## Data Processing
+**Required packages**: pygame, pandas, numpy, pillow, imageio
 
-### Download and Clean Data
-```bash
-# Download fresh data from Hong Kong Observatory
-python -m src.data_processing.download_data
+## 🎮 Controls
 
-# Clean and validate the data (preserves NaN for missing astronomical events)
-python -m src.data_processing.check_data
-```
+### Timelapse Animation
+- **SPACE**: Pause/Resume
+- **← →**: Speed control (0.01x to 5.0x)
+- **1-9**: Time presets (Dawn, Day, Sunset, Seasons)
+- **F11**: Fullscreen mode
 
-**Important**: The data cleaning process now correctly preserves NaN values for days when moon doesn't rise or set, ensuring astronomical accuracy.
+### 3D Time Spiral  
+- **Mouse**: Rotate view
+- **Wheel**: Zoom
+- **SPACE**: Auto-rotation toggle
+- **R**: Reset view
 
-## 🎮 Features and Controls
-
-### Timelapse Animation Controls
-- **SPACE**: Pause/Resume animation
-- **← →**: Change animation speed (0.01x to 5.0x)
-- **Q W**: Fine speed control (cycle presets)
-- **↑ ↓**: Jump days forward/backward
-- **1-9**: Quick time range presets (Dawn, Morning, Sunset, Night, Seasons)
-- **T**: Toggle time range loop
-- **R**: Reset to day 1
-- **F11**: Toggle fullscreen mode
-- **ESC**: Exit application
-
-### 3D Spiral Controls
-- **Mouse Movement**: Rotate 3D view
-- **Mouse Wheel**: Zoom in/out
-- **WASD/Arrow Keys**: Fine rotation control
-- **SPACE**: Toggle auto-rotation
-- **R**: Reset view to default
-- **ESC**: Exit application
-
-### Interactive Mode Controls
-- **Click**: Select any pixel for detailed info
-- **Mouse Wheel**: Scroll through timeline
-- **↑ ↓**: Navigate with arrow keys
+### Interactive Explorer
+- **Click**: Detailed astronomical data
+- **Wheel**: Scroll timeline
 - **P**: Change color palette
-- **T**: Toggle twilight information
-- **Home/End**: Jump to beginning/end
-- **ESC**: Exit application
+- **T**: Toggle twilight info
 
-## 🎨 Advanced Features
+### Circular Visualization
+- **Click**: Select day/hour
+- **R**: Rotate 30°
+- **← →**: Fine rotation
+- **S**: Toggle seasonal markers
 
-### Enhanced Display Technology
-- **Adaptive Resolution**: Automatically detects optimal screen size
-- **16:9 Aspect Ratio**: Perfect for modern widescreen displays
-- **Viewport Cropping**: 20% left-side cropping for focused viewing
-- **Full-Screen Support**: Immersive F11 full-screen experience
-- **Performance Optimization**: Pre-computed data for smooth real-time interaction
+## 🎨 Features
 
 ### Astronomical Accuracy
-- **Real Moon Phases**: Accurate lunar cycle calculations
-- **Twilight Zones**: Civil, nautical, and astronomical twilight
-- **Seasonal Events**: 13 major astronomical events marked
-- **Hong Kong Observatory Data**: Official 2024 sunrise/sunset/moonrise/moonset times
+- **Real Data**: Hong Kong Observatory 2024 official data
+- **Moon Phases**: Accurate lunar cycle calculations  
+- **Twilight Zones**: Civil, nautical, astronomical twilight
+- **Seasonal Events**: 13 major astronomical markers
 
-### Color Palette System
-- **Naturalistic**: Realistic atmospheric colors
-- **Vibrant**: Enhanced saturated artistic colors  
-- **Monochrome**: Elegant grayscale representations
-- **Classic**: Traditional astronomical visualization colors
+### Visual Excellence
+- **Adaptive Display**: Auto-detects optimal resolution
+- **Color Palettes**: Naturalistic, vibrant, monochrome, classic
+- **Smooth Animation**: 60 FPS with optimized rendering
+- **Professional UI**: Modern card-based interface
 
-## Data Processing
+### Interactive Innovation
+- **Real-time Data**: Click any pixel for detailed info
+- **3D Navigation**: Custom-built 3D engine
+- **Viewport Optimization**: Smart cropping for focused viewing
+- **Performance**: Pre-computed data for smooth interaction
 
-### Download and Clean Data
+## 📊 Data Processing
+
 ```bash
 # Download fresh data from Hong Kong Observatory
 python -m src.data_processing.download_data
 
-# Clean and validate the data (preserves NaN for missing astronomical events)
+# Clean and validate data
 python -m src.data_processing.check_data
 ```
 
-**Important**: The data cleaning process now correctly preserves NaN values for days when moon doesn't rise or set, ensuring astronomical accuracy.
+## 🎯 Output Examples
 
-## 🏗️ Technical Architecture
-
-### Modular Design
-- **8 Core Modules**: Separated concerns for maintainability
-- **Smart Import System**: Automatic path resolution for different environments
-- **Error Handling**: Comprehensive fallback mechanisms
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-
-### Performance Optimizations
-- **Pre-computed Astronomical Data**: Calculated once, used throughout
-- **Batch Rendering**: Optimized drawing for smooth animation
-- **Memory Management**: Efficient handling of large datasets
-- **Caching System**: Smart caching of expensive calculations
-
-## Recent Enhancements (Legacy Documentation)
-
-The following section preserves information about earlier development phases:
-
-### New Visualization Modes
-
-#### Interactive Circular Visualization
-- **File**: `circular_visualization.py`
-- **Features**: Radial layout with days arranged in a circle, hours radiating from center
-- **Controls**: 
-  - Click any point to select day/hour
-  - S - Toggle seasonal markers
-  - R - Rotate 30 degrees
-  - ← → - Fine rotation
-  - ESC - Exit
-
-#### Interactive Linear Timeline
-- **File**: `interactive_visualization.py` 
-- **Features**: Scrollable timeline with optimized screen sizing and real-time data panel
-- **Controls**: Click to select, scroll to navigate, hover for previews
-
-#### Static High-Resolution Generator
-- **File**: `generate_circular_image.py`
-- **Output**: Professional 1200x1200 PNG circular visualization
-
-### Advanced Astronomical Features
-
-#### Enhanced Color Palettes (`color_palettes.py`)
-- **Naturalistic**: Realistic atmospheric colors
-- **Vibrant**: Enhanced saturated artistic colors
-- **Monochrome**: Elegant grayscale representations
-- **Classic**: Traditional astronomical visualization colors
-
-#### Accurate Moon Phase System (`moon_phases.py`)
-- Real lunar cycle calculations using astronomical algorithms
-- Visual phase representations with color-coded illumination
-- Precise moon visibility and illumination percentages
-
-#### Advanced Twilight Calculations (`twilight_calculator.py`)
-- **Civil Twilight**: Sun 6° below horizon
-- **Nautical Twilight**: Sun 12° below horizon
-- **Astronomical Twilight**: Sun 18° below horizon
-- **Blue Hour**: Optimal photography lighting conditions
-- **Golden Hour**: Warm sunset/sunrise atmospheric colors
-
-#### Comprehensive Seasonal Markers (`seasonal_markers.py`)
-- **13 Major Astronomical Events** including:
-  - Solstices and Equinoxes (4 events)
-  - Meteor shower peaks: Quadrantids, Lyrids, Perseids, Geminids
-  - Lunar events: Supermoons and partial lunar eclipse
-  - Planetary oppositions: Mars and Jupiter
-- **Interactive Features**: Animated breathing effects, proximity-based labeling, toggle controls
-- **Educational Content**: Detailed descriptions and astronomical significance
-
-### Technical Improvements
-
-#### Modular Architecture
-- **8 Specialized Modules**: Separated concerns for better maintainability
-- **Enhanced Data Processing**: Automated download and validation systems
-- **Performance Optimization**: Pre-calculated pixel colors for smooth interaction
-
-#### Interactive Controls
-- **Real-time Data Display**: Click any day/hour for detailed astronomical information
-- **Smooth Navigation**: Optimized scrolling and rotation with fine controls
-- **Toggle Systems**: Show/hide seasonal markers and other visual elements
-
-### Installation and Usage
-
-#### Prerequisites
-```bash
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate  # Windows
-
-# Install required packages
-pip install pygame pandas numpy pillow imageio
-```
-
-#### Running the Visualizations
-```bash
-# Interactive circular cosmic clock
-python circular_visualization.py
-
-# Scrollable linear timeline
-python interactive_visualization.py
-
-# Generate static high-resolution image
-python generate_circular_image.py
-
-# Download and process data
-python download_data.py
-```
-
-### Output Files
-- `circular_time_visualization.png` - High-resolution circular cosmic clock
-- `enhanced_sun_moon_365days.png` - Advanced linear visualization
-- `sun_moon_365days_animation.gif` - Animated yearly progression
-- Various other specialized visualizations
-
-### 📁 Development Structure (For Contributors)
-```
-src/
-├── core/                              # Core astronomical calculations
-│   ├── time_utils.py                  # Time parsing and data loading
-│   ├── color_palettes.py              # Color scheme management
-│   ├── moon_phases.py                 # Lunar calculations
-│   ├── twilight_calculator.py         # Advanced sky colors
-│   └── seasonal_markers.py            # Astronomical events
-├── data_processing/                   # Data acquisition and cleaning
-│   ├── download_data.py               # Hong Kong Observatory API
-│   └── check_data.py                  # Data validation and cleaning
-└── visualizations/                    # Visualization implementations
-    ├── timelapse_visualization.py     # Main skyline animation
-    ├── time_spiral_3d.py              # 3D spiral innovation
-    ├── interactive_visualization.py   # Click-to-explore interface
-    ├── circular_visualization.py      # Radial time display
-    ├── enhanced_visualization.py      # Advanced pixel art
-    └── utils/                         # Helper utilities
-        ├── generate_circular_image.py
-        └── generate_timelapse_preview.py
-```
-
-### 🎯 Output Files
-- `enhanced_sun_moon_365days.png` - High-resolution linear timeline
-- `circular_time_visualization.png` - Circular cosmic clock
-- `sun_moon_365days_animation.gif` - Animated yearly progression
-- `sun_moon_animation_2024.gif` - Optimized timelapse animation
-- Various specialized astronomical visualizations
+Generated files include:
+- `enhanced_sun_moon_365days.png` - High-resolution timeline
+- `circular_time_visualization.png` - Cosmic clock (1200×1200)
+- `accurate_moon_visualization.png` - Moon phase analysis
+- `sun_moon_animation_2024.gif` - Yearly animation
+- `hongkong_timelapse_preview.png` - Sample frames
 
 ## 🤝 Contributing
 
-This project welcomes contributions from artists, coders, and data enthusiasts. The modular architecture makes it easy to:
-- Add new visualization modes
-- Implement different color palettes
-- Integrate additional astronomical data sources
-- Create new interactive features
+Contributions welcome! The modular architecture supports:
+- New visualization modes
+- Additional color palettes  
+- Extended astronomical data
+- Enhanced interactive features
 
 ## 📄 License
 
-This project is open source and available for educational and artistic use.
+Open source - Available for educational and artistic use.
