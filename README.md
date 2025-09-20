@@ -26,10 +26,10 @@ python main_menu.py
 
 ```
 Time-s-Pixel/
-├── � data/                           # Astronomical datasets
+├── data/                           # Astronomical datasets
 │   ├── hongkong_sunrise_sunset_2024_clean.csv
 │   └── moonrise_moonset_2024_clean.csv
-├── � src/                            # Core source code
+├── src/                            # Core source code
 │   ├── core/                          # Astronomical calculations
 │   │   ├── time_utils.py              # Time processing
 │   │   ├── color_palettes.py          # Color schemes  
@@ -51,22 +51,22 @@ Time-s-Pixel/
 │       └── utils/                        # Generation utilities
 │           ├── generate_circular_image.py
 │           └── generate_timelapse_preview.py
-├── � scripts/                        # Launch scripts
+├── scripts/                        # Launch scripts
 │   ├── run_timelapse.py               # Timelapse launcher
 │   ├── run_spiral_3d.py               # 3D spiral launcher
 │   ├── run_interactive.py             # Interactive launcher
 │   ├── image_viewer.py                # Image display utility
 │   ├── examples/                      # Example implementations
 │   └── image_generation/              # Static image generators
-├── � output/                         # Generated content
+├── output/                         # Generated content
 │   ├── images/                        # Static visualizations
 │   └── animations/                    # GIF animations
-├── 🎮 main_menu.py                    # Main menu system
-├── 🔄 timelapse_visualization.py      # Direct timelapse runner
-└── 📋 requirements.txt                # Dependencies
+├── main_menu.py                    # Main menu system
+├── timelapse_visualization.py      # Direct timelapse runner
+└── requirements.txt                # Dependencies
 ```
 
-## �️ Installation
+## Installation
 
 ```bash
 # Clone and setup
